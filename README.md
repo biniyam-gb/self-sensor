@@ -1,26 +1,28 @@
 # Self‑Localizing Sensor Network (SLSN)
 
 <p align="center">
-  <video width="600" controls autoplay muted loop>
+  <video width="600" controls>
     <source src="results/localization.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
+  <br>
+  <em>Convergence of the estimated positions (red) toward ground truth (blue).</em>
 </p>
 
-Recover the relative geometry of a random sensor deployment using only inter‑node distance measurements – no GPS, no centralised localisation infrastructure. The pipeline combines:
+You can get the relative geometry of a collection of sensors (electronic devices) using only node-to‑node distance measurements. This project includes:
 
 - **Anchor selection** – picks three well‑spaced nodes with direct links.
 - **Canonical placement** – fixes anchors in a reference frame.
 - **Iterative trilateration** – localises nodes with ≥3 known neighbours.
 - **Stress minimisation** – refines all free nodes via gradient descent on the mean squared edge‑length error.
 
-The code is fully self‑contained, with visualisation tools to inspect convergence, error distributions, and network connectivity.
+When done, it provides visualizations of the whole process.
 
 ---
 
 ## Installation
 
-Clone the repository and install the package in editable mode:
+Clone the repository and install the package:
 
 ```bash
 git clone https://github.com/yourusername/self-localizing-sensor-network.git
