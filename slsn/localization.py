@@ -35,7 +35,7 @@ class Localizer:
             max_iter: int = 30,
             refine_iterations: int = 500,
             refine_lr: float = 0.005,
-            snapshot_every: int = 10) -> None:
+            snapshot_every: int = 1) -> None:
         """Full localization pipeline."""
         if not self.anchors:
             self.select_anchors()
@@ -189,7 +189,7 @@ class Localizer:
     def refine_gradient_descent(self,
                                 iterations: int = 500,
                                 lr: float = 0.005,
-                                snapshot_every: int = 10) -> None:
+                                snapshot_every: int = 1) -> None:
         """Gradient descent on the stress function. Anchors are fixed.
 
         Stress:   E = Σ (‖x_i − x_j‖ − d_ij)²

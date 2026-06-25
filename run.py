@@ -22,7 +22,7 @@ from visualizers import (
 
 def main() -> None:
     np.random.seed(42)
-    out_dir = ROOT / "results"
+    out_dir = Path(__file__).resolve().parent / "results"
     out_dir.mkdir(exist_ok=True)
 
     print("\ndeploy sensors...")
@@ -40,7 +40,7 @@ def main() -> None:
 
     print("\nlocalization start...")
     loc = Localizer(net)
-    loc.run(max_iter=40, refine_iterations=1000, refine_lr=0.005)
+    loc.run(max_iter=20, refine_iterations=100, refine_lr=0.050)
     print(f"{loc.anchors} anchors")
     n_loc = sum(loc.localized)
     print(f"{n_loc} / {net.n_nodes} nodes")
@@ -57,7 +57,7 @@ def main() -> None:
     plot_true_vs_estimated(net, loc, save_path=out_dir / "true_v_est.png")
     plot_connectivity(net, loc, save_path=out_dir / "connectivity.png")
     plot_error_analysis(net, loc, save_path=out_dir / "error_analysis.png")
-    animate_localization(net, loc, save_path=out_dir / "localization.gif", fps=4)
+    animate_localization(net, loc, save_path=out_dir / "localization.mp4", fps=5)
     print(f"    saved to: {out_dir}")
 
 

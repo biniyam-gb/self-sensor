@@ -16,11 +16,8 @@ def animate_localization(network: SensorNetwork,
                          localizer: Localizer,
                          save_path: Optional[Path | str] = None,
                          fps: int = 4):
-    """Animate the history of estimated positions over the localization run.
+    from matplotlib.collections import LineCollection
 
-    Each frame is Procrustes-aligned to ground truth so the convergence
-    is visually meaningful. True positions are shown faded in the background.
-    """
     history = localizer.history
     true = network.true_positions
     true_c = true - true.mean(axis=0)
@@ -40,10 +37,15 @@ def animate_localization(network: SensorNetwork,
     fig, ax = plt.subplots(figsize=(8.5, 8.5))
     ax.scatter(true_c[:, 0], true_c[:, 1], c="steelblue", s=55, alpha=0.35,
                marker="o", edgecolors="k", linewidths=0.5, label="True", zorder=3)
+
     est_scat = ax.scatter([], [], c="crimson", s=70, marker="x",
                           label="Estimated", zorder=5, linewidths=1.8)
-    edge_lines = [ax.plot([], [], color="gray", alpha=0.25, lw=0.6)[0]
-                  for _ in edges]
+
+    # ---- Use a single LineCollection for all edges ----
+    edge_collection = LineCollection([], colors="gray", alpha=0.25,
+                                     linewidths=0.6, zorder=2)
+    ax.add_collection(edge_collection)
+
     # Mark anchors (their indices don't change across frames)
     anchor_handles = []
     for k, a in enumerate(localizer.anchors):
@@ -63,29 +65,28 @@ def animate_localization(network: SensorNetwork,
 
     def init():
         est_scat.set_offsets(np.empty((0, 2)))
-        for ln in edge_lines:
-            ln.set_data([], [])
+        edge_collection.set_segments([])
         for h in anchor_handles:
             h.set_offsets(np.empty((0, 2)))
-        return [est_scat, title, *edge_lines, *anchor_handles]
+        return [est_scat, title, edge_collection, *anchor_handles]
 
     def update(frame):
         est = aligned_frames[frame]
         est_scat.set_offsets(est)
-        for ln, (i, j) in zip(edge_lines, edges):
-            ln.set_data([est[i, 0], est[j, 0]],
-                        [est[i, 1], est[j, 1]])
+        # build segments from current estimates
+        segs = [(est[i], est[j]) for (i, j) in edges]
+        edge_collection.set_segments(segs)
         for h, a in zip(anchor_handles, localizer.anchors):
             h.set_offsets(est[a:a + 1])
         s = stress[frame] if frame < len(stress) else stress[-1]
         title.set_text(f"Iteration {frame} / {n_frames - 1}    "
                        f"stress = {s:.3f}")
-        return [est_scat, title, *edge_lines, *anchor_handles]
+        return [est_scat, title, edge_collection, *anchor_handles]
 
     ani = animation.FuncAnimation(
         fig, update, frames=n_frames, init_func=init,
-        blit=False, interval=1000 // fps, repeat=True)
+        blit=True, interval=1000 // fps, repeat=True)
 
     if save_path:
-        ani.save(save_path, writer="pillow", fps=fps)
+        ani.save(save_path, writer="ffmpeg", fps=fps)
     return ani
