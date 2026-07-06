@@ -23,7 +23,7 @@ Clone the repository and install the package:
 
 ```bash
 git clone https://github.com/yourusername/self-localizing-sensor-network.git
-cd self-localizing-sensor-network
+cd slsn
 pip install -e .
 ```
 
